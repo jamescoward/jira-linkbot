@@ -9,9 +9,13 @@ var token = process.env.SLACK_TOKEN;
 // create a bot
 var settings = {
     token: token,
-    name: 'jira-linkbot',
-    avatar: ':sunglasses'
+    name: 'jira-linkbot'
 };
+
+var messageParams = {
+    icon: ':sunglasses:'
+}
+
 var bot = new Bot(settings);
 
 // Get the list of channels and users
@@ -31,7 +35,7 @@ bot.on('message', function (message) {
         var responses = getJiraLinks(message.text);
 
         for (var i = 0; i < responses.length; i++) {
-            bot.postMessageToChannel(getChannelNameById(message.channel), responses[i]);
+            bot.postMessageToChannel(getChannelNameById(message.channel), responses[i], messageParams);
         }
     }
 });
