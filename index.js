@@ -13,7 +13,7 @@ var settings = {
 };
 
 var messageParams = {
-    icon: ':sunglasses:'
+    icon_emoji: ':sunglasses:'
 }
 
 var bot = new Bot(settings);
