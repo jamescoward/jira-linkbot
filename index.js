@@ -1,76 +1,91 @@
-var Botkit = require('botkit')
+var Bot = require('slackbots');
 
-var token = process.env.SLACK_TOKEN
+var ticketRegex = /\d+-[A-Z]+(?!-?[a-zA-Z]{1,10})/g;
 
-var controller = Botkit.slackbot({
-  // reconnect to Slack RTM when connection goes bad
-  retry: Infinity,
-  debug: false
-})
+var token = process.env.SLACK_TOKEN;
 
-// Assume single team mode if we have a SLACK_TOKEN
-if (token) {
-  console.log('Starting in single-team mode')
-  controller.spawn({
-    token: token
-  }).startRTM(function (err, bot, payload) {
-    if (err) {
-      throw new Error(err)
-    }
+// create a bot
+var settings = {
+    token: token,
+    name: 'linkbot'
+};
 
-    console.log('Connected to Slack RTM')
-  })
-// Otherwise assume multi-team mode - setup beep boop resourcer connection
-} else {
-  console.log('Starting in Beep Boop multi-team mode')
-  require('beepboop-botkit').start(controller, { debug: true })
-}
+var bot = new Bot(settings);
 
-controller.on('bot_channel_join', function (bot, message) {
-  bot.reply(message, "I'm here! Ready to to post some links!")
+var channels = [];
+bot.getChannels().then(function (data) {
+    channels = data.channels;
 });
 
-controller.hears(['hello', 'hi'], ['direct_mention'], function (bot, message) {
-  bot.reply(message, 'Hello. Do you need any links?')
+var users = [];
+bot.getUsers().then(function (data) {
+    users = data.members;
 });
 
-controller.hears('help', ['direct_message', 'direct_mention'], function (bot, message) {
-  var help = 'If you post text that looks like a Jira ticket ID, I\'ll get the link for you :wink:';
-  bot.reply(message, help)
-})
+bot.on('message', function(message) {
+    
+    if(!isChatMessage(message)) {
+           
+    } else {
 
-controller.hears([/\d+-[A-Z]+(?!-?[a-zA-Z]{1,10})/g], ['message_received'], areMatches, function(bot,message) {
+        if (isChannelMessage(message) && !isFromSelf(message)) {
 
-    bot.reply(message, 'Looking for these?');
+            var messages = getJiraLinks(message.text);
 
-    var links = getJiraLinks(message);
-
-    links.forEach(function (link) {
-        bot.reply(message, link);
-    });
-
-});
-
-function areMatches(patterns, message) {
-
-    for(var i = 0; i < patterns.length; i++) {
-        var pattern = patterns[i];
-        var matches = getMatches(pattern, message);
-        if (matches.length > 0) {
-            return true;
+            for (var i = 0; i < messages.length; i++) {
+                bot.postMessageToChannel(getChannelNameById(message.channel), messages[i]);
+            }
         }
     }
+});
 
-    return false;
-}
-
-function getJiraLinks (messageText) {    
-    return getMatches(messageText).map(getLink);  
-}
-
-function getMatches (pattern, msg){
+var user = '';
+function getUser () {
     
-    var matches = reverse(msg).match(pattern);
+   if(user !== '') {
+       return user;
+   }
+    
+    user = bot.users.filter(function(item) {
+       return  item.name = bot.name;
+    })[0];
+    
+    return user;
+}
+
+function getChannelNameById(channelId) {
+    return bot.channels.filter(function (item) {
+        return item.id === channelId;
+    })[0].name;
+}
+
+function reverse(s){
+    return s.split("").reverse().join("");
+}
+
+function isChannelMessage (message) {
+    return typeof message.channel === 'string' &&
+        message.channel[0] === 'C';
+}
+
+function isFromSelf(message) {
+    return message.user === user.id;
+}
+
+function isChatMessage(message) {
+    return message.type === 'message' && message.text;
+};
+
+function getJiraLinks (messageText) {
+    
+    var matches = getMatches(messageText);
+    
+    return matches.map(getLink);  
+}
+
+function getMatches (msg){
+    
+    var matches = reverse(msg).match(ticketRegex);
        
     if(matches === null) {
         matches = [];
@@ -79,6 +94,7 @@ function getMatches (pattern, msg){
     return matches.map(reverse);
 }
 
-function getLink(ticket) {    
-    return '<http://www.google.com/' + ticket + '|' + ticket + '>';
+function getLink(ticket) {
+    return '<http://www.google.com/' + ticket + '|' + ticket + '>'; 
 }
+ 

@@ -4,7 +4,8 @@
   "description": "A bot that watches for Jira ticket ids and posts a link to the the ticket",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -18,8 +19,12 @@
   "author": "James Coward",
   "license": "MIT",
   "homepage": "https://github.com/jamescoward/jira-linkbot#readme",
-  "dependencies": {
-    "beepboop-botkit": "^1.4.0",
-    "botkit": "~0.1.1"
+   "bugs": {
+    "url": "https://github.com/jamescoward/jira-linkbot/issues"
+  },
+ "dependencies": {
+    "q": "^1.4.1",
+    "slackbots": "^0.5.1"
   }
 }
+
