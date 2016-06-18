@@ -1,0 +1,3 @@
+name: JiraLinkBot
+description: A bot that watches for Jira ticket ids and posts a link to the the ticket
+#avatar: resources/avatar.png

@@ -1,0 +1,25 @@
+{
+  "name": "jira-linkbot",
+  "version": "0.0.1",
+  "description": "A bot that watches for Jira ticket ids and posts a link to the the ticket",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamescoward/jira-linkbot.git"
+  },
+  "keywords": [
+    "slackbot",
+    "jira",
+    "slack"
+  ],
+  "author": "James Coward",
+  "license": "MIT",
+  "homepage": "https://github.com/jamescoward/jira-linkbot#readme",
+  "dependencies": {
+    "beepboop-botkit": "^1.4.0",
+    "botkit": "~0.1.1"
+  }
+}
