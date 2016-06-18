@@ -2,16 +2,19 @@ var Bot = require('slackbots');
 
 var ticketRegex = /\d+-[A-Z]+(?!-?[a-zA-Z]{1,10})/g;
 
+// This will get the slack token passed to SLACK_TOKEN
+// You can hard code this if you like.
 var token = process.env.SLACK_TOKEN;
 
 // create a bot
 var settings = {
     token: token,
-    name: 'linkbot'
+    name: 'jira-linkbot',
+    avatar: ':sunglasses'
 };
-
 var bot = new Bot(settings);
 
+// Get the list of channels and users
 var channels = [];
 bot.getChannels().then(function (data) {
     channels = data.channels;
@@ -22,19 +25,13 @@ bot.getUsers().then(function (data) {
     users = data.members;
 });
 
-bot.on('message', function(message) {
-    
-    if(!isChatMessage(message)) {
-           
-    } else {
+bot.on('message', function (message) {
+    // Only respond to messages in a channel that are not sent by the bot itself
+    if (isChatMessage(message) && isChannelMessage(message) && !isFromSelf(message)) {
+        var responses = getJiraLinks(message.text);
 
-        if (isChannelMessage(message) && !isFromSelf(message)) {
-
-            var messages = getJiraLinks(message.text);
-
-            for (var i = 0; i < messages.length; i++) {
-                bot.postMessageToChannel(getChannelNameById(message.channel), messages[i]);
-            }
+        for (var i = 0; i < responses.length; i++) {
+            bot.postMessageToChannel(getChannelNameById(message.channel), responses[i]);
         }
     }
 });
@@ -95,6 +92,7 @@ function getMatches (msg){
 }
 
 function getLink(ticket) {
+    // change the first half of this to the correct url
     return '<http://www.google.com/' + ticket + '|' + ticket + '>'; 
 }
  
