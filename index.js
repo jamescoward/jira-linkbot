@@ -5,6 +5,7 @@ var ticketRegex = /\d+-[A-Z]+(?!-?[a-zA-Z]{1,10})/g;
 // This will get the slack token passed to SLACK_TOKEN
 // You can hard code this if you like.
 var token = process.env.SLACK_TOKEN;
+var url = process.env.JIRA_URL;
 
 // create a bot
 var settings = {
@@ -97,6 +98,6 @@ function getMatches (msg){
 
 function getLink(ticket) {
     // change the first half of this to the correct url
-    return '<http://www.google.com/' + ticket + '|' + ticket + '>'; 
+    return '<' + url + '/' + ticket + '|' + ticket + '>'; 
 }
  
