@@ -66,8 +66,8 @@ function reverse(s){
 }
 
 function isChannelMessage (message) {
-    return typeof message.channel === 'string' &&
-        message.channel[0] === 'C';
+    return typeof message.channel === 'string' && 
+       (message.channel[0] === 'C' || message.channel[0] === 'G');
 }
 
 function isFromSelf(message) {
