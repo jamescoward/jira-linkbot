@@ -19,17 +19,7 @@ var messageParams = {
 
 var bot = new Bot(settings);
 
-// Get the list of channels and users
-var channels = [];
-bot.getChannels().then(function (data) {
-    channels = data.channels;
-});
-
-var groups = [];
-bot.getGroups().then(function (data) {
-    groups = data.groups;
-});
-
+// Get the list of users
 
 var users = [];
 bot.getUsers().then(function (data) {
@@ -39,24 +29,12 @@ bot.getUsers().then(function (data) {
 
 
 bot.on('message', function (message) {
-    console.log(message.channel);
-
     // Only respond to messages in a channel that are not sent by the bot itself
     if (isChatMessage(message) && (isChannelMessage(message) || isGroupMessage(message)) && !isFromSelf(message)) {
         var responses = getJiraLinks(message.text);
-
-        var room;
-        if(isChannelMessage(message)) {
-            room = getChannelNameById(message.channel);
-        } else if( isGroupMessage(message)) {
-            room = getGroupNameById(message.channel);
-        } else {
-            return;
-        }
-
-
+        
         for (var i = 0; i < responses.length; i++) {
-            bot.postMessageToChannel(getChannelNameById(room), responses[i], messageParams);
+            bot.postMessage(message.channel, responses[i], messageParams);
         }
     }
 });
@@ -69,28 +47,13 @@ function getUser () {
     }
 
     user = bot.users.filter(function(item) {
-        return  item.name = bot.name;
+        return item.name === bot.name;
     })[0];
 
     return user;
 }
 
-function getChannelNameById(channelId) {
-    // return bot.channels.filter(function (item) {
-    //   return item.id === channelId;
-    //})[0].name;
-    return getRoomTypeById(channelId, channels);
-}
 
-function getGroupNameById(groupId) {
-    return getRoomTypeById(groupId, groups);
-}
-
-function getRoomTypeById(id, rooms) {
-    return rooms.filter(function (item) {
-        return item.id === id;
-    })[0].name;
-}
 
 function reverse(s){
     return s.split("").reverse().join("");
