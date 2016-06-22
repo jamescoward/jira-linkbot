@@ -19,55 +19,57 @@ var messageParams = {
 
 var bot = new Bot(settings);
 
-// Get the list of channels and users
-var channels = [];
-bot.getChannels().then(function (data) {
-    channels = data.channels;
-});
+// Get the list of users
 
 var users = [];
 bot.getUsers().then(function (data) {
     users = data.members;
 });
 
+
+
 bot.on('message', function (message) {
     // Only respond to messages in a channel that are not sent by the bot itself
-    if (isChatMessage(message) && isChannelMessage(message) && !isFromSelf(message)) {
+    if (isChatMessage(message) && (isChannelMessage(message) || isGroupMessage(message)) && !isFromSelf(message)) {
         var responses = getJiraLinks(message.text);
-
+        
         for (var i = 0; i < responses.length; i++) {
-            bot.postMessageToChannel(getChannelNameById(message.channel), responses[i], messageParams);
+            bot.postMessage(message.channel, responses[i], messageParams);
         }
     }
 });
 
 var user = '';
 function getUser () {
-    
-   if(user !== '') {
-       return user;
-   }
-    
+
+    if(user !== '') {
+        return user;
+    }
+
     user = bot.users.filter(function(item) {
-       return  item.name = bot.name;
+        return item.name === bot.name;
     })[0];
-    
+
     return user;
 }
 
-function getChannelNameById(channelId) {
-    return bot.channels.filter(function (item) {
-        return item.id === channelId;
-    })[0].name;
-}
+
 
 function reverse(s){
     return s.split("").reverse().join("");
 }
 
 function isChannelMessage (message) {
-    return typeof message.channel === 'string' && 
-       (message.channel[0] === 'C' || message.channel[0] === 'G');
+    return getMessageType(message, 'C');
+}
+
+function isGroupMessage (message) {
+    return getMessageType(message, 'G');
+}
+
+function getMessageType(message, type) {
+    return typeof message.channel === 'string' &&
+        (message.channel[0] === type);
 }
 
 function isFromSelf(message) {
@@ -76,28 +78,28 @@ function isFromSelf(message) {
 
 function isChatMessage(message) {
     return message.type === 'message' && message.text;
-};
+}
 
 function getJiraLinks (messageText) {
-    
+
     var matches = getMatches(messageText);
-    
-    return matches.map(getLink);  
+
+    return matches.map(getLink);
 }
 
 function getMatches (msg){
-    
+
     var matches = reverse(msg).match(ticketRegex);
-       
+
     if(matches === null) {
         matches = [];
     }
-    
+
     return matches.map(reverse);
 }
 
 function getLink(ticket) {
     // change the first half of this to the correct url
-    return '<' + url + '/' + ticket + '|' + ticket + '>'; 
+    return '<' + url + '/' + ticket + '|' + ticket + '>';
 }
- 
+
